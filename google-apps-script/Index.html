@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Navigasi Jalan Santai HGN 2026 Pasirwangi</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            pgri: {
+              50: '#f0fbf4',
+              100: '#dcf6e5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Leaflet.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Confetti.js -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Styling khusus Leaflet popup */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(229, 231, 235, 1);
+      padding: 2px;
+    }
+    .leaflet-popup-content {
+      margin: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .leaflet-bar {
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+    }
+    .leaflet-bar a {
+      background-color: #ffffff !important;
+      color: #1f2937 !important;
+      border-bottom: 1px solid #f3f4f6 !important;
+      width: 40px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+      transition: all 0.2s;
+    }
+    .leaflet-bar a:hover {
+      background-color: #f3f4f6 !important;
+      color: #059669 !important;
+    }
+    .custom-marker-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .custom-marker-badge:hover {
+      transform: scale(1.15);
+    }
+    /* Hide scrollbar but keep functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- SPLASH / LOADING SCREEN -->
+  <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-emerald-600 via-teal-700 to-green-800 text-white z-50 flex flex-col items-center justify-center p-6 text-center transition-all duration-700">
+    <div class="animate-bounce mb-6 text-6xl">🏁</div>
+    <h1 class="text-3xl font-extrabold tracking-tight mb-2">JALAN SANTAI HGN 2026</h1>
+    <p class="text-emerald-100 font-medium mb-1">Hari Guru Nasional & HUT PGRI ke-81</p>
+    <p class="text-xs text-emerald-200 uppercase tracking-widest mb-10">Kecamatan Pasirwangi, Garut</p>
+    <div class="w-16 h-1.5 bg-emerald-300 rounded-full overflow-hidden relative">
+      <div class="absolute inset-y-0 left-0 bg-white rounded-full w-8 animate-[ping_1.5s_infinite]"></div>
+    </div>
+    <p class="text-xs text-emerald-100 mt-4">Memuat peta rute interaktif...</p>
+  </div>
+
+  <!-- CONGRATULATIONS PANEL OVERLAY -->
+  <div id="congrats-modal" class="fixed inset-0 z-[10000] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-300 relative overflow-hidden">
+      <div class="absolute -top-12 -left-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl"></div>
+      <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-teal-500/10 rounded-full blur-xl"></div>
+      <div class="text-6xl mb-4">🏆</div>
+      <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat, Anda Berhasil!</h2>
+      <p class="text-sm text-slate-600 mb-4">Anda telah menyelesaikan rute Jalan Santai HGN 2026 Kecamatan Pasirwangi dari START sampai FINISH.</p>
+      <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 mb-6 flex flex-col items-center justify-center">
+        <span class="text-xs text-emerald-600 font-semibold uppercase tracking-wider mb-1">Status Perjalanan</span>
+        <span class="text-lg font-bold text-emerald-800">100% SELESAI 🎉</span>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button onclick="closeCongratsModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-2xl transition duration-200 shadow-md shadow-emerald-500/20">
+          Lihat Peta Rute
+        </button>
+        <button onclick="shareApp()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-6 rounded-2xl transition duration-200">
+          <i class="fa-solid fa-share-nodes mr-2"></i> Bagikan Keseruan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER (Sticky but premium) -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 transition-shadow">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-md shadow-emerald-500/15">
+          <i class="fa-solid fa-person-walking text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-slate-800 leading-tight tracking-tight text-sm md:text-base">JALAN SANTAI HGN 2026</h1>
+          <p class="text-slate-500 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Kecamatan Pasirwangi</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openQrModal()" class="p-2.5 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition duration-200" title="Tampilkan QR Code Rute">
+          <i class="fa-solid fa-qrcode text-lg"></i>
+        </button>
+        <button onclick="openRouteDetails()" class="p-2.5 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition duration-200" title="Detail Koordinat Rute">
+          <i class="fa-solid fa-list-ul text-lg"></i>
+        </button>
+        <button onclick="shareApp()" class="p-2.5 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition duration-200" title="Bagikan Rute">
+          <i class="fa-solid fa-share-nodes text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto relative overflow-hidden">
+    
+    <!-- LEFT SIDEBAR: DESKTOP PANEL / BOTTOM HUD ON MOBILE -->
+    <div id="sidebar-panel" class="w-full md:w-[380px] bg-white border-b md:border-b-0 md:border-r border-slate-100 flex flex-col overflow-y-auto no-scrollbar max-h-[45vh] md:max-h-none shrink-0 z-10 transition-all duration-300">
+      
+      <!-- HERO LANDING CARD -->
+      <div id="landing-card" class="p-5 border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 text-white shadow-xl relative overflow-hidden mb-4">
+          <div class="absolute right-[-10px] top-[-10px] text-8xl opacity-10 font-black">HGN</div>
+          <span class="bg-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Event HGN & HUT PGRI</span>
+          <h3 class="text-lg font-bold mt-2">Kecamatan Pasirwangi</h3>
+          <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+            Ikuti rute Jalan Santai sejauh ~1,8 km dengan 4 Pos Pemeriksaan. Pastikan GPS HP Anda aktif!
+          </p>
+          <div class="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs text-slate-300">
+            <div><i class="fa-solid fa-route text-emerald-400 mr-1.5"></i> Jarak: <b>~1.8 km</b></div>
+            <div><i class="fa-solid fa-circle-check text-teal-400 mr-1.5"></i> Checkpoint: <b>4 POS</b></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btn-start-nav" onclick="startNavigation()" class="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-md shadow-emerald-500/10">
+            <i class="fa-solid fa-person-running animate-bounce"></i> 🚶 MULAI NAVIGASI
+          </button>
+          <button onclick="scrollToMap()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-map"></i> 🗺️ LIHAT PETA
+          </button>
+          <button onclick="shareApp()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-share-nodes"></i> 📱 BAGIKAN RUTE
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATION CONTROLLER (SANGAT BERGUNA UNTUK EVALUASI DI MEJA) -->
+      <div class="p-4 bg-amber-50 border-b border-amber-100">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-flask animate-pulse text-amber-600"></i> Simulator GPS (Walk Demo)
+          </span>
+          <span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">Uji Coba</span>
+        </div>
+        <p class="text-[11px] text-amber-700 leading-relaxed mb-3">
+          Karena Anda berada di luar area Pasirwangi, gunakan simulator ini untuk menguji auto-checkpoint 50m, progress bar, audio, & chimes.
+        </p>
+        <div class="flex flex-col gap-1.5">
+          <div class="flex gap-1.5">
+            <button id="btn-toggle-sim" onclick="toggleSimulation()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-play"></i> Mulai Simulasi Jalan
+            </button>
+            <button onclick="teleportNextCheckpoint()" class="bg-white border border-amber-300 text-amber-800 font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1 hover:bg-amber-100 transition">
+              Lompat POS <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-amber-700 mt-1">
+            <span>Kecepatan simulasi:</span>
+            <select id="sim-speed" onchange="changeSimSpeed()" class="bg-white border border-amber-300 rounded px-1.5 py-0.5 font-medium outline-none">
+              <option value="fast">Sangat Cepat (15s)</option>
+              <option value="normal">Normal (Santai)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGATION HUD (Only visible when active navigation or simulation is on) -->
+      <div id="nav-hud-card" class="p-5 border-b border-slate-100 bg-emerald-50/50 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status Navigasi Realtime</h4>
+          <span id="nav-tracking-indicator" class="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> GPS Aktif
+          </span>
+        </div>
+
+        <div class="flex items-start gap-3.5 mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+            <i id="hud-nav-icon" class="fa-solid fa-person-walking"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tujuan Berikutnya</span>
+            <h3 id="hud-target-name" class="font-bold text-slate-800 text-base truncate">POS 1 (Pertigaan Sukaraja)</h3>
+            <p id="hud-distance-label" class="text-xs text-emerald-700 font-semibold mt-0.5">Menghitung jarak...</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm mb-4">
+          <div class="text-center border-r border-slate-100">
+            <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Arah Kompas</span>
+            <div class="flex items-center justify-center gap-1 mt-1 text-slate-700">
+              <i id="hud-compass-arrow" class="fa-solid fa-arrow-up transition-transform duration-300 text-emerald-600 text-sm"></i>
+              <span id="hud-compass-direction" class="text-xs font-bold">Utara</span>
+            </div>
+            <span id="hud-compass-angle" class="text-[10px] text-slate-400">0°</span>
+          </div>
+          <div class="text-center">
+            <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Status Anda</span>
+            <span id="hud-status" class="text-xs font-bold text-slate-700 inline-block mt-1">Sedang Berjalan</span>
+            <span id="hud-nav-mode" class="text-[10px] text-slate-400 block">Metode: Berjalan</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <button id="btn-gmaps" onclick="openGoogleMapsDirections()" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition">
+            <i class="fa-brands fa-google-play text-red-400"></i> BUKA DI GOOGLE MAPS
+          </button>
+          <button onclick="recenterMapOnUser()" class="w-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold py-2 px-4 rounded-xl flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-location-crosshairs text-emerald-600"></i> Cari Posisi Saya
+          </button>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR CARD -->
+      <div class="p-5 border-b border-slate-100">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Progress Perjalanan</span>
+          <span id="progress-text" class="text-sm font-extrabold text-emerald-600">0%</span>
+        </div>
+        <!-- Progress slider bar -->
+        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-3.5 relative border border-slate-200/50">
+          <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-emerald-500 to-teal-600 w-[0%] transition-all duration-500 rounded-full"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-slate-400 font-semibold uppercase">
+          <span>START</span>
+          <span>POS 1</span>
+          <span>POS 2</span>
+          <span>POS 3</span>
+          <span>POS 4</span>
+          <span>FINISH</span>
+        </div>
+      </div>
+
+      <!-- TIMELINE CHECKPOINTS -->
+      <div class="p-5 flex-1">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Daftar Checkpoint (Timeline)</h4>
+        <div id="timeline-container" class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-slate-200">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- SECURITY & PRIVACY NOTE -->
+      <div class="p-4 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-400 leading-relaxed text-center">
+        <i class="fa-solid fa-shield-halved mr-1 text-slate-400"></i> 
+        Lokasi Anda hanya diproses secara lokal di perangkat Anda untuk navigasi rute dan tidak disimpan oleh aplikasi.
+      </div>
+    </div>
+
+    <!-- RIGHT SECTION: MAP VIEWPORT -->
+    <div class="flex-1 h-[55vh] md:h-auto relative flex flex-col">
+      <!-- MAP VIEWPORT -->
+      <div id="map" class="w-full flex-1 min-h-[300px]"></div>
+
+      <!-- MAP STYLE PILL SELECTOR (Standard vs Satelit) -->
+      <div class="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-1.5">
+        <button id="btn-style-standard" onclick="changeMapStyle('standard')" class="px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer bg-emerald-600 text-white shadow-md shadow-emerald-600/25 font-black">
+          <i class="fa-solid fa-map"></i> Standard
+        </button>
+        <button id="btn-style-satellite" onclick="changeMapStyle('satellite')" class="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-slate-600 hover:text-emerald-600 hover:bg-slate-50">
+          <i class="fa-solid fa-earth-asia"></i> Satelit
+        </button>
+        <button id="btn-style-dark" onclick="changeMapStyle('dark')" class="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-slate-600 hover:text-emerald-600 hover:bg-slate-50">
+          <i class="fa-solid fa-moon"></i> Dark
+        </button>
+      </div>
+
+      <!-- REAL-TIME USER GPS ACCURACY BAR -->
+      <div id="gps-accuracy-bar" class="absolute top-4 left-4 right-4 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-slate-100 max-w-sm mx-auto flex items-center justify-between transition-all duration-300 hover:bg-white">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div id="gps-signal-icon" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div class="min-w-0 leading-tight">
+            <span id="gps-status-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sinyal GPS</span>
+            <span id="gps-status-detail" class="text-xs font-bold text-slate-700 truncate block">Lokasi GPS belum tersedia.</span>
+          </div>
+        </div>
+        <button onclick="requestGPSTracking()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition shrink-0 ml-2">
+          <i class="fa-solid fa-rotate mr-1 animate-[spin_3s_linear_infinite]"></i> Cari GPS
+        </button>
+      </div>
+
+      <!-- MAP FLOATING FLOATER CONTROLS (At Bottom-Right of map) -->
+      <div class="absolute bottom-4 right-4 z-[1000] flex flex-col gap-2">
+        <div class="flex flex-col rounded-xl bg-white shadow-xl border border-slate-100 overflow-hidden">
+          <button onclick="mapFlyToRoute()" class="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-emerald-600 hover:bg-slate-50 border-b border-slate-100 transition-colors" title="Zoom Fit Seluruh Rute">
+            <i class="fa-solid fa-expand text-sm"></i>
+          </button>
+          <button id="btn-recenter" onclick="recenterMapOnUser()" class="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-emerald-600 hover:bg-slate-50 transition-colors" title="Kembalikan Peta ke Lokasi Saya">
+            <i class="fa-solid fa-location-crosshairs text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-100 py-4 px-4 text-center text-xs text-slate-400 z-10">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="font-medium">
+        Jalan Santai HGN & HUT PGRI ke-81 Kecamatan Pasirwangi © 2026 Panitia
+      </p>
+      <div class="flex gap-4">
+        <a href="mailto:pasirwangipgri@gmail.com" class="hover:text-emerald-600 transition">Hubungi Panitia</a>
+        <span>•</span>
+        <button onclick="openAppsScriptModal()" class="hover:text-emerald-600 transition font-bold"><i class="fa-solid fa-code text-emerald-500 mr-1"></i> Apps Script Web App</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ROUTE DETAILS MODAL -->
+  <div id="route-details-modal" class="fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-list-ul text-emerald-600"></i> Detail Koordinat & Waypoints
+        </h3>
+        <button onclick="closeRouteDetails()" class="text-slate-400 hover:text-slate-600 rounded-full p-1 bg-slate-50">
+          <i class="fa-solid fa-xmark text-lg w-6 h-6 flex items-center justify-center"></i>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto pr-1 no-scrollbar space-y-4 text-sm" id="route-coordinates-list">
+        <!-- Dynamically loaded -->
+      </div>
+      <div class="border-t border-slate-100 pt-4 mt-4 shrink-0 flex justify-end">
+        <button onclick="closeRouteDetails()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-xl transition">
+          Tutup Detail
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR CODE MODAL -->
+  <div id="qr-modal" class="fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <h3 class="text-base font-bold text-slate-800">QR Code Rute Jalan Santai</h3>
+        <button onclick="closeQrModal()" class="text-slate-400 hover:text-slate-600 rounded-full p-1 bg-slate-50">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed mb-4">
+        Panitia dapat menempel QR Code ini di spanduk, kartu peserta, pendaftaran, atau sosial media agar peserta bisa langsung memindai & mengikuti rute.
+      </p>
+      <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col items-center justify-center mb-4">
+        <img id="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://pasirwangipgri.gmail.com" class="w-48 h-48 rounded-lg bg-white p-2 shadow-sm" alt="QR Code Rute">
+        <span class="text-[10px] text-slate-400 font-mono mt-3 break-all select-all px-2 max-w-full" id="qr-url-text">Memuat URL...</span>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="shareApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+          <i class="fa-solid fa-share-nodes mr-1.5"></i> Bagikan Link
+        </button>
+        <button onclick="closeQrModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOOGLE APPS SCRIPT EXPORT MODAL -->
+  <div id="gas-modal" class="fixed inset-0 z-[10000] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-code text-emerald-600 animate-pulse"></i> Deploy ke Google Apps Script
+          </h3>
+          <p class="text-[11px] text-slate-400 font-medium">Buat Web App mandiri Anda tanpa server atau biaya hosting!</p>
+        </div>
+        <button onclick="closeAppsScriptModal()" class="text-slate-400 hover:text-slate-600 rounded-full p-1 bg-slate-50">
+          <i class="fa-solid fa-xmark text-lg w-6 h-6 flex items-center justify-center"></i>
+        </button>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto space-y-5 pr-1 no-scrollbar text-sm text-slate-600 leading-relaxed">
+        
+        <!-- STEP BY STEP GUIDE -->
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <h4 class="font-bold text-emerald-800 text-xs uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> Panduan Cara Deploy 3 Menit:
+          </h4>
+          <ol class="list-decimal list-inside space-y-1.5 text-xs text-emerald-900 font-medium pl-1">
+            <li>Buka <a href="https://script.google.com" target="_blank" class="underline text-emerald-700 hover:text-emerald-800 font-bold">Google Apps Script (script.google.com)</a> & buat Project Baru.</li>
+            <li>Ganti isi file bawaan <code class="bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-mono font-bold">Code.gs</code> dengan menyalin teks kode di bawah ini.</li>
+            <li>Buat file HTML baru bernama <code class="bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-mono font-bold">Index</code> (ketik "Index" tanpa .html), lalu salin isi <code class="bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-mono font-bold">Index.html</code> ke dalamnya.</li>
+            <li>Klik tombol <b>Terapkan (Deploy)</b> di bagian atas → <b>Penerapan Baru (New Deployment)</b>.</li>
+            <li>Pilih Jenis penerapan: <b>Aplikasi Web (Web App)</b>.</li>
+            <li>Setel Akses (Who has access): <b>Siapa saja (Anyone)</b>.</li>
+            <li>Klik <b>Terapkan</b> dan Anda akan mendapatkan URL Web App publik Anda!</li>
+          </ol>
+        </div>
+
+        <!-- CODE SELECTOR TAB -->
+        <div class="flex border-b border-slate-100 shrink-0">
+          <button id="btn-tab-code" onclick="switchGasTab('code')" class="py-2.5 px-4 font-bold text-xs border-b-2 border-emerald-500 text-emerald-600 flex items-center gap-1.5">
+            <i class="fa-brands fa-js"></i> Code.gs (Backend)
+          </button>
+          <button id="btn-tab-html" onclick="switchGasTab('html')" class="py-2.5 px-4 font-semibold text-xs border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-code"></i> Index.html (Frontend)
+          </button>
+        </div>
+
+        <!-- CODE DISPLAY AREA -->
+        <div class="relative">
+          <button onclick="copyGasCode()" class="absolute right-3 top-3 bg-slate-800 hover:bg-slate-900 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1.5 transition shadow-lg">
+            <i class="fa-regular fa-copy"></i> <span id="copy-text-indicator">Salin Kode</span>
+          </button>
+          <pre id="gas-code-preview" class="bg-slate-900 text-emerald-400 p-4 rounded-2xl text-[11px] font-mono overflow-auto max-h-[300px] leading-relaxed select-all">
+          </pre>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-4 mt-4 shrink-0 flex justify-end gap-2">
+        <button onclick="downloadGasPackage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-file-arrow-down"></i> Unduh File .ZIP
+        </button>
+        <button onclick="closeAppsScriptModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-xs transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILED JAVASCRIPT CODE -->
+  <script>
+    // --- DATA WAYPOINTS ---
+    let routeWaypoints = [];
+    let activeWaypointIndex = 0;
+    let isNavigating = false;
+    let userLocation = null;
+    let userAccuracy = null;
+    let watchId = null;
+    let map = null;
+    let userMarker = null;
+    let userAccuracyCircle = null;
+    let waypointsMarkers = [];
+    let polylineRoute = null;
+    let polylineFallback = null;
+    let outOfRoute = false;
+    const triggeredCheckpoints = new Set();
+    
+    // --- SIMULASI SETTINGS ---
+    let isSimulating = false;
+    let simIntervalId = null;
+    let simCoordinates = [];
+    let simIndex = 0;
+    let simSpeed = 'fast'; // 'fast' or 'normal'
+
+    // Map style state
+    let activeMapStyle = 'standard';
+    let mapTileLayers = {};
+
+    // Load initial config from backend
+    const AppConfig = {
+      title: "JALAN SANTAI HGN 2026",
+      subtitle: "Hari Guru Nasional & HUT Ke-81 PGRI Kecamatan Pasirwangi",
+      year: "2026",
+      organizer: "Panitia PGRI Cabang Pasirwangi, Garut"
+    };
+
+    // --- SOUND & SPEECH SYNTHESIS ---
+    function speakIndonesian(text) {
+      if ('speechSynthesis' in window) {
+        // Cancel ongoing speak to avoid queuing delay
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        oscillator.start();
+        
+        oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime + 0.15);
+        
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+        oscillator.stop(audioCtx.currentTime + 0.5);
+      } catch (e) {
+        console.log("Audio API not allowed/supported");
+      }
+    }
+
+    // --- INITIALIZE APPLICATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      // Fetch waypoints & initialize
+      fetchWaypointsAndRoute();
+
+      // Configure current URL for QR Code
+      const currentUrl = window.location.href;
+      document.getElementById('qr-url-text').innerText = currentUrl;
+      document.getElementById('qr-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(currentUrl);
+    });
+
+    function fetchWaypointsAndRoute() {
+      // Ganti dengan data asli secara offline jika di GAS. 
+      // Karena kita bisa dipanggil dari Google Apps Script, mari langsung set data mentah.
+      routeWaypoints = [
+        {
+          id: "START",
+          name: "START (Gedung PGRI/Alun-alun)",
+          lat: -7.218420061372144,
+          lng: 107.80347852494886,
+          icon: "🏁",
+          color: "green",
+          label: "START",
+          description: "Titik awal Jalan Santai. Pastikan berada dalam radius 50 meter dari titik ini untuk memulai perjalanan.",
+          percentage: 0
+        },
+        {
+          id: "POS_1",
+          name: "POS 1 (Pertigaan Sukaraja)",
+          lat: -7.2168328952312875,
+          lng: 107.80728060724292,
+          icon: "1",
+          color: "blue",
+          label: "POS 1",
+          description: "Pos pemeriksaan pertama. Ambil kupon atau stempel di titik ini sebelum melanjutkan rute.",
+          percentage: 20
+        },
+        {
+          id: "POS_2",
+          name: "POS 2 (Kampung Kancil)",
+          lat: -7.212187332127545,
+          lng: 107.80200207867729,
+          icon: "2",
+          color: "blue",
+          label: "POS 2",
+          description: "Pos pemeriksaan kedua. Istirahat sejenak dan minum air yang telah disediakan panitia.",
+          percentage: 40
+        },
+        {
+          id: "POS_3",
+          name: "POS 3 (Pertigaan Barusari)",
+          lat: -7.212982611724765,
+          lng: 107.79518867755725,
+          icon: "3",
+          color: "blue",
+          label: "POS 3",
+          description: "Pos pemeriksaan ketiga. Tetap ikuti jalur berjalan santai di pinggir jalan demi keselamatan.",
+          percentage: 60
+        },
+        {
+          id: "POS_4",
+          name: "POS 4 (Kampung Cigalumpit)",
+          lat: -7.217256211874366,
+          lng: 107.7987291553488,
+          icon: "4",
+          color: "blue",
+          label: "POS 4",
+          description: "Pos pemeriksaan terakhir. Pastikan semua kupon Anda sudah lengkap sebelum melangkah ke garis finish.",
+          percentage: 80
+        },
+        {
+          id: "FINISH",
+          name: "FINISH (Gedung PGRI/Alun-alun)",
+          lat: -7.218720840778179,
+          lng: 107.803363456828,
+          icon: "🏆",
+          color: "red",
+          label: "FINISH",
+          description: "Garis akhir Jalan Santai! Masukkan kupon undian Anda ke dalam kotak doorprize di panggung utama.",
+          percentage: 100
+        }
+      ];
+
+      // Render timeline & map
+      initMap();
+      renderTimeline();
+      renderCoordinatesList();
+      
+      // Load OSRM walking route
+      fetchOSRMRoute();
+
+      // Hide loading splash with a slight delay for premium effect
+      setTimeout(() => {
+        document.getElementById('splash-screen').classList.add('opacity-0');
+        setTimeout(() => {
+          document.getElementById('splash-screen').classList.add('hidden');
+        }, 700);
+      }, 1000);
+    }
+
+    // --- MAP FUNCTIONS ---
+    function initMap() {
+      // Center map on starting point
+      const startPoint = routeWaypoints[0];
+      map = L.map('map', {
+        zoomControl: false, // will put custom layout or native top-left
+        maxZoom: 19
+      }).setView([startPoint.lat, startPoint.lng], 15);
+
+      L.control.zoom({
+        position: 'topleft'
+      }).addTo(map);
+
+      // Define map layers (Tile providers)
+      mapTileLayers.standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+      });
+
+      mapTileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      });
+
+      mapTileLayers.satelliteLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Labels &copy; Esri'
+      });
+
+      mapTileLayers.satelliteRoads = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Roads &copy; Esri'
+      });
+
+      mapTileLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{y}/{x}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+      });
+
+      // Default layer
+      mapTileLayers.standard.addTo(map);
+
+      // Draw custom waypoint markers
+      routeWaypoints.forEach((wp, index) => {
+        // Custom div icon representing a high-fidelity sports marker
+        let bgHex = '#10b981'; // Green for START
+        if (wp.id === 'FINISH') bgHex = '#ef4444'; // Red for FINISH
+        else if (wp.id.startsWith('POS_')) bgHex = '#3b82f6'; // Blue for POS
+
+        const customHtml = `
+          <div class="custom-marker-badge w-9 h-9 rounded-full text-white font-extrabold flex items-center justify-center border-2 border-white shadow-lg text-sm" style="background-color: ${bgHex}">
+            ${wp.icon}
+          </div>
+        `;
+
+        const icon = L.divIcon({
+          html: customHtml,
+          className: 'custom-leaflet-icon',
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+          popupAnchor: [0, -18]
+        });
+
+        const popupContent = `
+          <div class="p-1">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+              ${wp.icon} ${wp.id}
+            </h4>
+            <p class="text-xs text-slate-500 font-semibold mt-0.5">${wp.name}</p>
+            <p class="text-xs text-slate-600 mt-1.5 border-t border-slate-100 pt-1.5">${wp.description}</p>
+            <button onclick="zoomToAndSelectWaypoint(${index})" class="mt-2.5 w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold py-1.5 px-2.5 rounded-lg border border-emerald-100 flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-location-arrow"></i> Navigasi ke Titik ini
+            </button>
+          </div>
+        `;
+
+        const marker = L.marker([wp.lat, wp.lng], { icon: icon }).addTo(map);
+        marker.bindPopup(popupContent);
+        waypointsMarkers.push(marker);
+      });
+
+      // Render standard straight polyline fallback immediately
+      const straightCoords = routeWaypoints.map(wp => [wp.lat, wp.lng]);
+      polylineFallback = L.polyline(straightCoords, {
+        color: '#10b981',
+        weight: 6,
+        opacity: 0.5,
+        dashArray: '10, 12',
+        lineCap: 'round'
+      }).addTo(map);
+    }
+
+    function changeMapStyle(style) {
+      if (!mapTileLayers[style]) return;
+      
+      // Remove all current layers
+      mapTileLayers.standard.remove();
+      mapTileLayers.satellite.remove();
+      if (mapTileLayers.satelliteLabels) mapTileLayers.satelliteLabels.remove();
+      if (mapTileLayers.satelliteRoads) mapTileLayers.satelliteRoads.remove();
+      mapTileLayers.dark.remove();
+      
+      // Add new layer(s)
+      if (style === 'satellite') {
+        mapTileLayers.satellite.addTo(map);
+        if (mapTileLayers.satelliteRoads) mapTileLayers.satelliteRoads.addTo(map);
+        if (mapTileLayers.satelliteLabels) mapTileLayers.satelliteLabels.addTo(map);
+      } else {
+        mapTileLayers[style].addTo(map);
+      }
+      
+      // Update button styles
+      const styles = ['standard', 'satellite', 'dark'];
+      styles.forEach(s => {
+        const btn = document.getElementById(`btn-style-${s}`);
+        if (!btn) return;
+        if (s === style) {
+          btn.className = "px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer bg-emerald-600 text-white shadow-md shadow-emerald-600/25 font-black";
+          // Replace standard font weight
+          const icon = btn.querySelector('i');
+          if (icon) {
+            if (s === 'standard') icon.className = "fa-solid fa-map";
+            else if (s === 'satellite') icon.className = "fa-solid fa-earth-asia";
+            else if (s === 'dark') icon.className = "fa-solid fa-moon";
+          }
+        } else {
+          btn.className = "px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-slate-600 hover:text-emerald-600 hover:bg-slate-50";
+        }
+      });
+
+      activeMapStyle = style;
+    }
+
+    function mapFlyToRoute() {
+      if (polylineRoute) {
+        map.fitBounds(polylineRoute.getBounds(), { padding: [50, 50] });
+      } else if (polylineFallback) {
+        map.fitBounds(polylineFallback.getBounds(), { padding: [50, 50] });
+      }
+    }
+
+    // --- FETCH REAL ROAD ROUTING (OSRM WALKING) ---
+    async function fetchOSRMRoute() {
+      const legs = [
+        { from: routeWaypoints[0], to: routeWaypoints[1], profile: 'driving' },
+        { from: routeWaypoints[1], to: routeWaypoints[2], profile: 'driving' },
+        { from: routeWaypoints[2], to: routeWaypoints[3], profile: 'driving' },
+        { from: routeWaypoints[3], to: routeWaypoints[4], profile: 'driving' }, // Follow the main road (jalan besar)!
+        { from: routeWaypoints[4], to: routeWaypoints[5], profile: 'driving' }
+      ];
+
+      try {
+        const promises = legs.map(async (leg) => {
+          const osrmUrl = `https://router.project-osrm.org/route/v1/${leg.profile}/${leg.from.lng},${leg.from.lat};${leg.to.lng},${leg.to.lat}?overview=full&geometries=geojson`;
+          try {
+            const res = await fetch(osrmUrl);
+            const data = await res.json();
+            if (data && data.routes && data.routes.length > 0) {
+              const geojson = data.routes[0].geometry;
+              return geojson.coordinates.map(coord => [coord[1], coord[0]]); // [lat, lng]
+            }
+          } catch (e) {
+            console.error(`OSRM failed for leg: ${leg.from.id} -> ${leg.to.id}`, e);
+          }
+
+          // Fallback for this single leg if OSRM fails
+          const points = [];
+          const steps = 15;
+          for (let s = 0; s <= steps; s++) {
+            const lat = leg.from.lat + (leg.to.lat - leg.from.lat) * (s / steps);
+            const lng = leg.from.lng + (leg.to.lng - leg.from.lng) * (s / steps);
+            points.push([lat, lng]);
+          }
+          return points;
+        });
+
+        const results = await Promise.all(promises);
+        const combinedCoords = results.flat();
+        simCoordinates = combinedCoords;
+
+        // Subdue the straight fallback dashed line
+        if (polylineFallback) {
+          polylineFallback.setStyle({ opacity: 0.15, weight: 3 });
+        }
+
+        // Draw highly stylized real road polyline
+        if (polylineRoute) {
+          polylineRoute.setLatLngs(combinedCoords);
+        } else {
+          polylineRoute = L.polyline(combinedCoords, {
+            color: '#059669', // Emerald 600
+            weight: 8,
+            opacity: 0.85,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(map);
+        }
+        
+        // Adjust map view to cover route
+        map.fitBounds(polylineRoute.getBounds(), { padding: [40, 40] });
+
+      } catch (err) {
+        console.error("Error building combined route:", err);
+        generateFallbackSimulationCoords();
+      }
+    }
+
+    // Generate step-by-step coordinates between checkpoints for fallback simulation
+    function generateFallbackSimulationCoords() {
+      simCoordinates = [];
+      for (let i = 0; i < routeWaypoints.length - 1; i++) {
+        const start = routeWaypoints[i];
+        const end = routeWaypoints[i+1];
+        
+        // Interpolate 15 steps between each checkpoint
+        const steps = 15;
+        for (let s = 0; s < steps; s++) {
+          const lat = start.lat + (end.lat - start.lat) * (s / steps);
+          const lng = start.lng + (end.lng - start.lng) * (s / steps);
+          simCoordinates.push([lat, lng]);
+        }
+      }
+      // Add final waypoint
+      simCoordinates.push([routeWaypoints[routeWaypoints.length - 1].lat, routeWaypoints[routeWaypoints.length - 1].lng]);
+    }
+
+    // --- RENDERING VIEWS ---
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+
+      routeWaypoints.forEach((wp, index) => {
+        let statusText = '';
+        let statusClass = '';
+        let dotClass = '';
+        let stepColor = '';
+
+        if (index < activeWaypointIndex) {
+          statusText = '✓ SELESAI';
+          statusClass = 'text-emerald-600 font-extrabold';
+          dotClass = 'bg-emerald-500 ring-4 ring-emerald-100 text-white';
+          stepColor = 'text-slate-800';
+        } else if (index === activeWaypointIndex) {
+          statusText = '● TUJUAN SAAT INI';
+          statusClass = 'text-blue-600 font-extrabold text-xs animate-pulse';
+          dotClass = 'bg-blue-600 ring-4 ring-blue-100 text-white animate-bounce';
+          stepColor = 'font-bold text-slate-900';
+        } else {
+          statusText = '○ BELUM DILEWATI';
+          statusClass = 'text-slate-400 font-medium';
+          dotClass = 'bg-slate-200 text-slate-500';
+          stepColor = 'text-slate-500';
+        }
+
+        const div = document.createElement('div');
+        div.className = 'relative flex items-start gap-4';
+        div.innerHTML = `
+          <div class="absolute -left-[23px] w-[14px] h-[14px] rounded-full flex items-center justify-center text-[10px] ${dotClass} z-10 font-bold">
+            ${index < activeWaypointIndex ? '✓' : ''}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-center">
+              <h5 class="text-xs font-bold leading-none ${stepColor}">${wp.icon} ${wp.id} - ${wp.label}</h5>
+              <span class="text-[9px] uppercase tracking-wider ${statusClass}">${statusText}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 leading-normal font-medium">${wp.name}</p>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderCoordinatesList() {
+      const container = document.getElementById('route-coordinates-list');
+      container.innerHTML = '';
+
+      routeWaypoints.forEach(wp => {
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100/50 transition-colors flex items-start gap-3';
+        div.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+            ${wp.icon}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-extrabold text-slate-800 text-xs">${wp.name}</h4>
+            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">${wp.description}</p>
+            <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 pt-2 border-t border-slate-200/50 text-[10px] text-slate-400 font-mono">
+              <span>Lat: <b>${wp.lat}</b></span>
+              <span>Lng: <b>${wp.lng}</b></span>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function zoomToAndSelectWaypoint(index) {
+      const wp = routeWaypoints[index];
+      map.setView([wp.lat, wp.lng], 18);
+      
+      // Select for navigation target if navigation is active
+      if (isNavigating) {
+        activeWaypointIndex = index;
+        updateNavigationState();
+        renderTimeline();
+      }
+    }
+
+    // --- NAVIGATION LOGIC ---
+    function startNavigation() {
+      triggeredCheckpoints.clear(); // Reset check flags on new start
+      isNavigating = true;
+      document.getElementById('nav-hud-card').classList.remove('hidden');
+      document.getElementById('landing-card').classList.add('hidden');
+      
+      // Speech synthesis start
+      speakIndonesian("Navigasi dimulai. Silakan ikuti rute jalan santai dari titik start.");
+      playChime();
+
+      requestGPSTracking();
+      updateNavigationState();
+    }
+
+    function requestGPSTracking() {
+      if (!navigator.geolocation) {
+        updateGPSStatusIndicator('warn', 'Geolocation tidak didukung oleh browser Anda.');
+        return;
+      }
+
+      updateGPSStatusIndicator('loading', 'Menghubungkan ke sensor GPS...');
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      };
+
+      // Watch user's real position
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          // Skip updating real GPS if we are running in simulator mode
+          if (isSimulating) return;
+
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+
+          userLocation = [lat, lng];
+          userAccuracy = accuracy;
+
+          updateUserMapMarker(lat, lng, accuracy);
+          processUserLocation(lat, lng, accuracy);
+        },
+        (error) => {
+          if (isSimulating) return; // Ignore errors in simulation
+
+          let msg = 'Gagal membaca lokasi.';
+          if (error.code === error.PERMISSION_DENIED) {
+            msg = 'Akses GPS ditolak. Silakan izinkan lokasi di HP Anda.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            msg = 'GPS tidak tersedia. Pindah ke area terbuka.';
+          } else if (error.code === error.TIMEOUT) {
+            msg = 'Waktu pencarian GPS habis.';
+          }
+          updateGPSStatusIndicator('error', msg);
+        },
+        options
+      );
+    }
+
+    function updateUserMapMarker(lat, lng, accuracy) {
+      if (!map) return;
+
+      // Draw or update User Position Marker
+      if (userMarker) {
+        userMarker.setLatLng([lat, lng]);
+      } else {
+        const userHtml = `
+          <div class="relative w-7 h-7 flex items-center justify-center">
+            <div class="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-45"></div>
+            <div class="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+          </div>
+        `;
+        const userIcon = L.divIcon({
+          html: userHtml,
+          className: 'user-location-marker',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+      }
+
+      // Draw Accuracy Circle
+      if (userAccuracyCircle) {
+        userAccuracyCircle.setLatLng([lat, lng]);
+        userAccuracyCircle.setRadius(accuracy);
+      } else {
+        userAccuracyCircle = L.circle([lat, lng], {
+          radius: accuracy,
+          color: '#3b82f6',
+          weight: 1,
+          opacity: 0.15,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.08
+        }).addTo(map);
+      }
+
+      // Automatically fly map center to user location
+      if (isNavigating) {
+        map.setView([lat, lng]);
+      }
+    }
+
+    function recenterMapOnUser() {
+      if (userLocation && map) {
+        map.setView(userLocation, 18);
+      } else {
+        alert("Lokasi GPS Anda belum tersedia. Pastikan izin lokasi aktif atau gunakan Simulator GPS.");
+      }
+    }
+
+    function updateGPSStatusIndicator(type, message) {
+      const bar = document.getElementById('gps-accuracy-bar');
+      const iconDiv = document.getElementById('gps-signal-icon');
+      const detailSpan = document.getElementById('gps-status-detail');
+      
+      detailSpan.innerText = message;
+
+      if (type === 'error') {
+        iconDiv.className = 'w-7 h-7 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0';
+        iconDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      } else if (type === 'loading') {
+        iconDiv.className = 'w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0';
+        iconDiv.innerHTML = '<i class="fa-solid fa-compass animate-spin"></i>';
+      } else if (type === 'success') {
+        iconDiv.className = 'w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0';
+        iconDiv.innerHTML = '<i class="fa-solid fa-satellite-dish animate-[pulse_1.5s_infinite]"></i>';
+      }
+    }
+
+    // --- HAVERSINE DISTANCE & BEARING ---
+    function getHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // meters
+      const phi1 = lat1 * Math.PI / 180;
+      const phi2 = lat2 * Math.PI / 180;
+      const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+      const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                Math.cos(phi1) * Math.cos(phi2) *
+                Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c; // in meters
+    }
+
+    function getBearing(lat1, lon1, lat2, lon2) {
+      const phi1 = lat1 * Math.PI / 180;
+      const phi2 = lat2 * Math.PI / 180;
+      const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+      const y = Math.sin(deltaLambda) * Math.cos(phi2);
+      const x = Math.cos(phi1) * Math.sin(phi2) -
+                Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+      let brng = Math.atan2(y, x) * 180 / Math.PI;
+      return (brng + 360) % 360;
+    }
+
+    function getCompassDirection(bearing) {
+      const directions = [
+        'Utara', 'Timur Laut', 'Timur', 'Tenggara', 
+        'Selatan', 'Barat Daya', 'Barat', 'Barat Laut'
+      ];
+      const index = Math.round(bearing / 45) % 8;
+      return directions[index];
+    }
+
+    // --- CORE REALTIME GPS PROCESSOR ---
+    function processUserLocation(lat, lng, accuracy) {
+      if (!isNavigating || routeWaypoints.length === 0) return;
+
+      updateGPSStatusIndicator('success', `Akurasi GPS: ±${Math.round(accuracy)} meter`);
+
+      // 1. Get Active Target Checkpoint
+      const currentTarget = routeWaypoints[activeWaypointIndex];
+
+      // 2. Calculate Distance to Target
+      const distToTarget = getHaversineDistance(lat, lng, currentTarget.lat, currentTarget.lng);
+
+      // 3. Update HUD Display details
+      document.getElementById('hud-target-name').innerText = currentTarget.name;
+      
+      let distanceText = '';
+      if (distToTarget < 1000) {
+        distanceText = `${Math.round(distToTarget)} meter lagi menuju ${currentTarget.label}`;
+      } else {
+        distanceText = `${(distToTarget / 1000).toFixed(1)} km lagi menuju ${currentTarget.label}`;
+      }
+      document.getElementById('hud-distance-label').innerText = distanceText;
+
+      // 4. Update Compass / Angle / Bearing
+      const bearing = getBearing(lat, lng, currentTarget.lat, currentTarget.lng);
+      document.getElementById('hud-compass-angle').innerText = `${Math.round(bearing)}°`;
+      document.getElementById('hud-compass-direction').innerText = getCompassDirection(bearing);
+      document.getElementById('hud-compass-arrow').style.transform = `rotate(${bearing}deg)`;
+
+      // 5. Detect Out-of-Route (> 100 meters deviation from path coordinates)
+      let currentPathCoords = simCoordinates;
+      if (currentPathCoords.length === 0) {
+        currentPathCoords = routeWaypoints.map(wp => [wp.lat, wp.lng]);
+      }
+
+      let minPathDistance = Infinity;
+      currentPathCoords.forEach(coord => {
+        const d = getHaversineDistance(lat, lng, coord[0], coord[1]);
+        if (d < minPathDistance) minPathDistance = d;
+      });
+
+      if (minPathDistance > 100) {
+        outOfRoute = true;
+        document.getElementById('hud-status').innerHTML = '<span class="text-red-500 font-extrabold flex items-center gap-1"><i class="fa-solid fa-circle-exclamation animate-ping"></i> Keluar Rute!</span>';
+        document.getElementById('hud-nav-mode').innerHTML = '<button onclick="mapFlyToRoute()" class="text-[9px] bg-red-100 hover:bg-red-200 text-red-700 px-2 py-0.5 rounded-md font-bold transition">🔄 Kembali ke Rute</button>';
+      } else {
+        outOfRoute = false;
+        document.getElementById('hud-status').innerText = 'Sedang Berjalan';
+        document.getElementById('hud-nav-mode').innerText = 'Metode: Berjalan';
+      }
+
+      // 6. CHECKPOINT RECOVERY/RADIUS CHECK (50 meters)
+      // Radius check: 50 meters
+      if (distToTarget <= 50) {
+        // Trigger checkpoint hit!
+        triggerCheckpointReached(activeWaypointIndex);
+      }
+    }
+
+    function triggerCheckpointReached(index) {
+      const reachedWp = routeWaypoints[index];
+      
+      // Guard to prevent duplicate triggers
+      if (triggeredCheckpoints.has(reachedWp.id)) return;
+      triggeredCheckpoints.add(reachedWp.id);
+
+      playChime();
+
+      // Confetti effect inside
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.85 }
+      });
+
+      // Special handling per point
+      if (reachedWp.id === 'START') {
+        speakIndonesian("Anda berada di start. Rute Jalan Santai resmi dimulai! Menuju Pos Satu.");
+        activeWaypointIndex = 1;
+      } else if (reachedWp.id === 'FINISH') {
+        // Complete Route!
+        speakIndonesian("Selamat! Anda telah mencapai garis akhir jalan santai. Selamat menikmati doorprize!");
+        activeWaypointIndex = 5; // Stay on finish
+        triggerRouteCompletion();
+      } else {
+        // It's Pos 1, 2, 3, or 4
+        const nextWpNum = index + 1;
+        const nextWp = routeWaypoints[nextWpNum];
+        
+        speakIndonesian(`${reachedWp.label} tercapai! Silakan lanjutkan menuju ${nextWp.label}.`);
+        activeWaypointIndex = nextWpNum;
+      }
+
+      updateNavigationState();
+      renderTimeline();
+    }
+
+    function updateNavigationState() {
+      // Update overall progress bar fill
+      // Checkpoints: START(0), POS1(20), POS2(40), POS3(60), POS4(80), FINISH(100)
+      const percent = activeWaypointIndex * 20;
+      document.getElementById('progress-text').innerText = `${percent}%`;
+      document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+    }
+
+    function triggerRouteCompletion() {
+      // Show celebration modal
+      document.getElementById('congrats-modal').classList.remove('hidden');
+      
+      // Stop tracking/sim
+      if (isSimulating) {
+        toggleSimulation();
+      }
+
+      // Continuously fire soft confetti
+      const duration = 4 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 10000 };
+
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 40 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+    }
+
+    function closeCongratsModal() {
+      document.getElementById('congrats-modal').classList.add('hidden');
+    }
+
+    // --- GOOGLE MAPS EXTERNAL NAVIGATION DIRECTIONS ---
+    function openGoogleMapsDirections() {
+      const currentTarget = routeWaypoints[activeWaypointIndex];
+      let originCoords = "";
+
+      if (userLocation) {
+        originCoords = `${userLocation[0]},${userLocation[1]}`;
+      } else {
+        // Fallback to start point if no location available
+        originCoords = `${routeWaypoints[0].lat},${routeWaypoints[0].lng}`;
+      }
+
+      const destCoords = `${currentTarget.lat},${currentTarget.lng}`;
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${originCoords}&destination=${destCoords}&travelmode=walking`;
+      window.open(url, '_blank');
+    }
+
+    // --- GEOLOCATION MOCK SIMULATOR ---
+    function toggleSimulation() {
+      if (isSimulating) {
+        // Turn OFF simulation
+        isSimulating = false;
+        clearInterval(simIntervalId);
+        document.getElementById('btn-toggle-sim').innerHTML = '<i class="fa-solid fa-play"></i> Mulai Simulasi';
+        document.getElementById('btn-toggle-sim').className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition';
+        speakIndonesian("Simulasi dihentikan.");
+      } else {
+        // Turn ON simulation
+        triggeredCheckpoints.clear(); // Reset check flags on new simulation start
+        isSimulating = true;
+        isNavigating = true;
+        document.getElementById('nav-hud-card').classList.remove('hidden');
+        document.getElementById('landing-card').classList.add('hidden');
+
+        document.getElementById('btn-toggle-sim').innerHTML = '<i class="fa-solid fa-pause"></i> Hentikan';
+        document.getElementById('btn-toggle-sim').className = 'flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition';
+        
+        speakIndonesian("Simulasi dimulai. Berjalan otomatis menyusuri rute.");
+        playChime();
+
+        if (simCoordinates.length === 0) {
+          generateFallbackSimulationCoords();
+        }
+
+        // Reset index
+        simIndex = 0;
+        activeWaypointIndex = 0;
+        updateNavigationState();
+        renderTimeline();
+
+        runSimulationStep();
+      }
+    }
+
+    function changeSimSpeed() {
+      simSpeed = document.getElementById('sim-speed').value;
+      if (isSimulating) {
+        // Restart loop with new speed
+        clearInterval(simIntervalId);
+        runSimulationStep();
+      }
+    }
+
+    function runSimulationStep() {
+      const intervalMs = simSpeed === 'fast' ? 450 : 2500; // fast-forward or normal walk
+
+      simIntervalId = setInterval(() => {
+        if (simIndex >= simCoordinates.length) {
+          clearInterval(simIntervalId);
+          return;
+        }
+
+        const currentPos = simCoordinates[simIndex];
+        const lat = currentPos[0];
+        const lng = currentPos[1];
+        
+        userLocation = [lat, lng];
+        userAccuracy = 8.5; // Simulate excellent GPS accuracy (8.5m)
+
+        updateUserMapMarker(lat, lng, userAccuracy);
+        processUserLocation(lat, lng, userAccuracy);
+
+        simIndex++;
+      }, intervalMs);
+    }
+
+    function teleportNextCheckpoint() {
+      if (!isNavigating) {
+        startNavigation();
+      }
+      
+      // Force user position to match target position to trigger checkpoint
+      const target = routeWaypoints[activeWaypointIndex];
+      userLocation = [target.lat, target.lng];
+      userAccuracy = 10;
+      
+      updateUserMapMarker(target.lat, target.lng, userAccuracy);
+      processUserLocation(target.lat, target.lng, userAccuracy);
+    }
+
+    function scrollToMap() {
+      document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- SHARE FUNCTION (WEB SHARE API) ---
+    function shareApp() {
+      const text = "Jalan Santai HGN 2026 Kecamatan Pasirwangi\nIkuti rute Jalan Santai dari START sampai FINISH secara interaktif.";
+      const url = window.location.href;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Navigasi Jalan Santai HGN 2026',
+          text: text,
+          url: url,
+        }).catch(err => console.log(err));
+      } else {
+        // Clipboard Fallback
+        navigator.clipboard.writeText(`${text}\n${url}`)
+          .then(() => {
+            alert("📋 Teks & Link navigasi rute berhasil disalin ke clipboard!");
+          })
+          .catch(err => {
+            console.error("Gagal menyalin link:", err);
+          });
+      }
+    }
+
+    // --- MODALS CONTROL ---
+    function openRouteDetails() {
+      document.getElementById('route-details-modal').classList.remove('hidden');
+    }
+    function closeRouteDetails() {
+      document.getElementById('route-details-modal').classList.add('hidden');
+    }
+
+    function openQrModal() {
+      document.getElementById('qr-modal').classList.remove('hidden');
+    }
+    function closeQrModal() {
+      document.getElementById('qr-modal').classList.add('hidden');
+    }
+
+    // --- APPS SCRIPT CODE VIEWER ---
+    let activeGasTab = 'code';
+    
+    function openAppsScriptModal() {
+      document.getElementById('gas-modal').classList.remove('hidden');
+      loadGasCodePreview();
+    }
+    
+    function closeAppsScriptModal() {
+      document.getElementById('gas-modal').classList.add('hidden');
+    }
+
+    function switchGasTab(tab) {
+      activeGasTab = tab;
+      
+      const tabCode = document.getElementById('btn-tab-code');
+      const tabHtml = document.getElementById('btn-tab-html');
+      
+      if (tab === 'code') {
+        tabCode.className = 'py-2.5 px-4 font-bold text-xs border-b-2 border-emerald-500 text-emerald-600 flex items-center gap-1.5';
+        tabHtml.className = 'py-2.5 px-4 font-semibold text-xs border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1.5';
+      } else {
+        tabHtml.className = 'py-2.5 px-4 font-bold text-xs border-b-2 border-emerald-500 text-emerald-600 flex items-center gap-1.5';
+        tabCode.className = 'py-2.5 px-4 font-semibold text-xs border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1.5';
+      }
+      
+      loadGasCodePreview();
+    }
+
+    // Generates a self-contained copy-pasteable Code.gs and Index.html!
+    function loadGasCodePreview() {
+      const preview = document.getElementById('gas-code-preview');
+      if (activeGasTab === 'code') {
+        preview.innerText = `/**
+ * APLIKASI NAVIGASI RUTE JALAN SANTAI
+ * HGN TAHUN 2026 KECAMATAN PASIRWANGI
+ * 
+ * Google Apps Script - Code.gs (Backend)
+ * Author: Panitia Hari Guru Nasional & HUT PGRI ke-81 Kecamatan Pasirwangi
+ */
+
+function doGet(e) {
+  var template = HtmlService.createTemplateFromFile('Index');
+  return template.evaluate()
+      .setTitle('Navigasi Jalan Santai HGN 2026 Pasirwangi')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function getRouteData() {
+  return {
+    name: "Jalan Santai HGN 2026 Kecamatan Pasirwangi",
+    waypoints: [
+      { id: "START", name: "START (Gedung PGRI/Alun-alun)", lat: -7.218420061372144, lng: 107.80347852494886, icon: "🏁", color: "green", label: "START", description: "Titik awal Jalan Santai. Pastikan berada dalam radius 50 meter dari titik ini untuk memulai.", percentage: 0 },
+      { id: "POS_1", name: "POS 1 (Pertigaan Sukaraja)", lat: -7.2168328952312875, lng: 107.80728060724292, icon: "1", color: "blue", label: "POS 1", description: "Pos pemeriksaan pertama. Ambil kupon atau stempel di titik ini.", percentage: 20 },
+      { id: "POS_2", name: "POS 2 (Kampung Kancil)", lat: -7.212187332127545, lng: 107.80200207867729, icon: "2", color: "blue", label: "POS 2", description: "Pos pemeriksaan kedua. Istirahat sejenak dan minum air.", percentage: 40 },
+      { id: "POS_3", name: "POS 3 (Pertigaan Barusari)", lat: -7.212982611724765, lng: 107.79518867755725, icon: "3", color: "blue", label: "POS 3", description: "Pos pemeriksaan ketiga. Tetap ikuti jalur berjalan di pinggir jalan.", percentage: 60 },
+      { id: "POS_4", name: "POS 4 (Kampung Cigalumpit)", lat: -7.217256211874366, lng: 107.7987291553488, icon: "4", color: "blue", label: "POS 4", description: "Pos pemeriksaan terakhir. Pastikan kupon lengkap.", percentage: 80 },
+      { id: "FINISH", name: "FINISH (Gedung PGRI/Alun-alun)", lat: -7.218720840778179, lng: 107.803363456828, icon: "🏆", color: "red", label: "FINISH", description: "Garis akhir Jalan Santai! Masukkan kupon undian Anda.", percentage: 100 }
+    ]
+  };
+}`;
+      } else {
+        // We output the self-contained complete code from the document
+        // We can dynamically output the HTML layout here.
+        // To make it very robust, we render the entire Index.html we are writing
+        fetch(window.location.origin + '/Index.html')
+          .then(res => res.text())
+          .then(text => {
+            preview.innerText = text;
+          })
+          .catch(() => {
+            // Fallback: use document.documentElement.outerHTML
+            preview.innerText = document.documentElement.outerHTML;
+          });
+      }
+    }
+
+    function copyGasCode() {
+      const code = document.getElementById('gas-code-preview').innerText;
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          const btnText = document.getElementById('copy-text-indicator');
+          btnText.innerText = "✓ Tersalin!";
+          setTimeout(() => { btnText.innerText = "Salin Kode"; }, 2000);
+        })
+        .catch(err => {
+          console.error("Gagal menyalin:", err);
+        });
+    }
+
+    function downloadGasPackage() {
+      // Creates a simplified zip downer using data URI for easier client download without big zip libraries
+      const codeContent = document.getElementById('gas-code-preview').innerText;
+      const fileName = activeGasTab === 'code' ? 'Code.gs' : 'Index.html';
+      
+      const blob = new Blob([codeContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Navigasi Jalan Santai HGN 2026 Pasirwangi",
+  "description": "Aplikasi navigasi rute interaktif untuk peserta Jalan Santai Hari Guru Nasional (HGN) 2026 & HUT PGRI ke-81 Kecamatan Pasirwangi, Garut.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

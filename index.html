@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Navigasi Jalan Santai HGN 2026 Pasirwangi</title>
+    <meta name="description" content="Aplikasi navigasi rute interaktif untuk peserta Jalan Santai Hari Guru Nasional (HGN) 2026 & HUT PGRI ke-81 Kecamatan Pasirwangi, Garut." />
+    <meta property="og:title" content="Navigasi Jalan Santai HGN 2026 Pasirwangi" />
+    <meta property="og:description" content="Aplikasi navigasi rute interaktif untuk peserta Jalan Santai Hari Guru Nasional (HGN) 2026 & HUT PGRI ke-81 Kecamatan Pasirwangi, Garut." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Leaflet.js Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Custom Leaflet Styles to fit beautifully with Tailwind and have clean tooltips/popups -->
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      /* Leaflet custom styling */
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(229, 231, 235, 1);
+        padding: 4px;
+      }
+      .leaflet-popup-content {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 12px;
+      }
+      .leaflet-container {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .leaflet-bar {
+        border: none !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+      }
+      .leaflet-bar a {
+        border-bottom: 1px solid #f3f4f6 !important;
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .leaflet-bar a:hover {
+        background-color: #f9fafb !important;
+        color: #059669 !important;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800 selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
